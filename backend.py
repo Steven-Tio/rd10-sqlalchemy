@@ -18,6 +18,8 @@ class User(BaseModel):
     @field_validator('pid')
     def pid_must_be_9_digits(cls, value: int):
         # TODO: Raise ValueError if pid is not 9 digits
+        if(len(str(value)) != 9):
+            raise ValueError("Invalid PID")
         return value
 
 
@@ -41,6 +43,13 @@ class UserEntity(Base):
     last_name: Mapped[str] = mapped_column(String)
 
     # TODO: Define from_model and to_model methods
+    @classmethod
+    def from_model(cls: Type[Self], user: User) -> Self:
+        return UserEntity(pid=user.pid, first_name=user.first_name, last_name = user.last_name)
+    
+    # TODO: Define an *instance method* to convert a UserEntity into a Pydantic User model
+    def to_model(self) -> User:
+        return User(pid=self.pid, first_name=self.first_name, last_name=self.last_name)
 
 
 Base.metadata.create_all(engine)
@@ -57,7 +66,10 @@ class UserService:
 
     def register(self, user: User) -> User:
         # TODO: Persist the `user` object
-        return user
+        user_entity: UserEntity = UserEntity.from_model(user)
+        self._session.add(user_entity)
+        self._session.commit()
+        return user_entity.to_model()
 
     def get(self, pid: int) -> User:
         user = self._session.get(UserEntity, pid)
@@ -70,6 +82,10 @@ class UserService:
 # =========================
 # Demo
 # 1. Construct a User
+a_user = User(pid=123456789, first_name="Kris", last_name="Jordan")
 # 2. Construct a UserService(session_factory())
+user_service = UserService(session_factory)
 # 3. Register your User object using the service
+user_service.register(a_user)
 # 4. Use the get method of your service to fetch the user from database
+print(user_service.get(123456789))
