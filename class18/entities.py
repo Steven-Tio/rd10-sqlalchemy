@@ -4,7 +4,7 @@ from typing import Self, Type
 from .models import User, Checkin
 
 # TODO: Uncomment once UserDetails and CheckinDetails are implemented.
-# from .models import UserDetails, CheckinDetails
+from .models import UserDetails, CheckinDetails
 
 from sqlalchemy import create_engine, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import (
@@ -39,15 +39,15 @@ class UserEntity(Base):
     def to_model(self) -> User:
         return User(pid=self.pid, first_name=self.first_name, last_name=self.last_name)
 
-    # TODO: Uncomment once UserDetails is implemented
-    # def to_model_details(self) -> UserDetails:
-    #     checkins = map(lambda checkin_entity: checkin_entity.to_model(), self.checkins)
-    #     return UserDetails(
-    #         pid=self.pid,
-    #         first_name=self.first_name,
-    #         last_name=self.last_name,
-    #         checkins=checkins,
-    #     )
+    #TODO: Uncomment once UserDetails is implemented
+    def to_model_details(self) -> UserDetails:
+        checkins = map(lambda checkin_entity: checkin_entity.to_model(), self.checkins)
+        return UserDetails(
+            pid=self.pid,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            checkins=checkins,
+        )
 
 
 class CheckinEntity(Base):
@@ -67,8 +67,9 @@ class CheckinEntity(Base):
     def to_model(self) -> Checkin:
         return Checkin(id=self.id, user=self.user.to_model(), timestamp=self.timestamp)
 
-    # TODO: Uncomment after implementing CheckinDetails
-    # def to_model_details(self) -> CheckinDetails:
-    #     return CheckinDetails(
-    #         id=self.id, timestamp=self.timestamp, user=self.user.to_model()
-    #     )
+    #TODO: Uncomment after implementing CheckinDetails
+    def to_model_details(self) -> CheckinDetails:
+        user = self.user.to_model()
+        return CheckinDetails(
+            id=self.id, timestamp=self.timestamp, user=user
+        )

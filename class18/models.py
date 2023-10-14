@@ -8,7 +8,6 @@ class User(BaseModel):
     pid: int
     first_name: str
     last_name: str
-    checkins: list["Checkin"]
 
     @field_validator("pid")
     def pid_must_be_9_digits(cls, value: int):
@@ -22,4 +21,11 @@ class Checkin(BaseModel):
 
     id: int
     timestamp: datetime
+
+class UserDetails(User):
+    """Adding checkins to the User class."""
+    checkins: list[Checkin]
+
+class CheckinDetails(Checkin):
+    """Adding user to Checkin Class"""
     user: User
